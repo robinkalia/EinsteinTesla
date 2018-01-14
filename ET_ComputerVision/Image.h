@@ -19,6 +19,10 @@ namespace einsteintesla {
 			uint32_t height_;
 			uint8_t depth_;
 
+		protected:
+			// Filtering method used for erosion and dilation
+			void ApplyMorphologicalFilter(const Image& kernel, bool erodeCond = true);
+
 		public:
 
 			static const uint8_t COLOR_DEPTH = 3;
@@ -28,6 +32,7 @@ namespace einsteintesla {
 			}
 
 			Image(uint32_t w, uint32_t h, uint8_t d) : width_(w), height_(h), depth_(d) {
+				this->buffer_ = std::vector<Pixel>(w*h*d, Pixel());
 			}
 
 			Image(const Image& img) {
@@ -39,7 +44,7 @@ namespace einsteintesla {
 				this->width_ = this->height_ = this->depth_ = -1;
 			}
 
-			Image(const std::string& img_file, uint8_t depth = 0 /*Color Mode*/) {
+			Image(const std::string& img_file, uint8_t depth = Image::COLOR_DEPTH /*Color Mode*/) {
 				this->LoadImage(img_file, depth);
 			}
 
@@ -56,14 +61,15 @@ namespace einsteintesla {
 			void CopyFrom(const Image& p);
 
 			// Input Operations
-			void LoadImage(const std::string& img_file, int32_t depth = 0 /*Color Mode*/);
+			void LoadImage(const std::string& imgFile, int32_t depth = 0 /*Color Mode*/);
 		
 			// Basic Computer Vision Operations
-			void Erode(const Image& kernel);
+			// We assume a rectangular kernel for basic 
+			// Morphological operations - Erode and Dilate
+			void Erode(const Image& kernel);   
 			void Dilate(const Image& kernel);
 
-
-			void Filter(uint8_t filter_type, uint32_t filterSize);
+			void Filter(uint8_t filterType, uint32_t filterSize);
 
 			void GenerateColorHistogram(std::vector<std::vector<uint64_t>>& img_color_hist);
 			void GenerateGrayHistogram(std::vector<uint64_t>& img_gray_hist);
